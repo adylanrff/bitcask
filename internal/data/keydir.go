@@ -15,6 +15,10 @@ func (k *Keydir) Get(key types.Key) (KeydirEntry, bool) {
 	return val, ok
 }
 
+func (k *Keydir) Delete(key types.Key) {
+	delete((*k), key)
+}
+
 type KeydirEntry struct {
 	FileID      string
 	ValueSize   uint64

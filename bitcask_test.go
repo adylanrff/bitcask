@@ -89,6 +89,35 @@ func Test_Bitcask(t *testing.T) {
 				},
 			},
 		},
+		{
+			name: "set multiple should return the correct set value",
+			args: args{
+				commands: []command{
+					{
+						cmd:     "set",
+						key:     "test",
+						value:   "value",
+						wantErr: false,
+					},
+					{
+						cmd:     "get",
+						key:     "test",
+						want:    types.Value("value"),
+						wantErr: false,
+					},
+					{
+						cmd:     "del",
+						key:     "test",
+						wantErr: false,
+					},
+					{
+						cmd:  "get",
+						key:  "test",
+						want: types.Value(nil),
+					},
+				},
+			},
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -116,6 +145,12 @@ func Test_Bitcask(t *testing.T) {
 					err = db.Put(types.Key(command.key), types.Value(command.value))
 					if (err != nil) != tt.wantErr {
 						t.Errorf("set() error = %v, wantErr %v", err, tt.wantErr)
+						return
+					}
+				case "del":
+					err = db.Delete(types.Key(command.key))
+					if (err != nil) != tt.wantErr {
+						t.Errorf("Delete() error = %v, wantErr %v", err, tt.wantErr)
 						return
 					}
 				}

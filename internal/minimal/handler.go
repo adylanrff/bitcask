@@ -15,6 +15,10 @@ import (
 	"github.com/adylanrff/bitcask/pkg/types"
 )
 
+const (
+	TombstoneValue = "__TOMBSTONE__"
+)
+
 // Minimal bitcask implements the bitcask handler with bare minimum capabilities.
 type Handler struct {
 	sync.RWMutex
@@ -87,8 +91,10 @@ func (h *Handler) Put(key types.Key, value types.Value) error {
 }
 
 // Delete implements bitcask.Handler.
-func (*Handler) Delete(key types.Key) error {
-	panic("unimplemented")
+func (h *Handler) Delete(key types.Key) error {
+	h.inmem.Delete(key)
+
+	return nil
 }
 
 // Fold implements bitcask.Handler.
@@ -170,6 +176,23 @@ func (h *Handler) appendEntry(entry *data.Entry) error {
 		ValueOffset: h.offset + uint64(16) + uint64(len(entry.Key)),
 		Timestamp:   entry.Timestamp,
 	})
+
+	h.offset += n
+	// END Critical Section
+
+	return nil
+}
+
+func (h *Handler) appendKeyTombstone(entry *data.Entry) error {
+	entry.Value = types.Value(TombstoneValue)
+
+	h.Lock()
+	defer h.Unlock()
+	// START critical section
+	n, err := h.codec.Encode(h.activeFile, entry)
+	if err != nil {
+		return err
+	}
 
 	h.offset += n
 	// END Critical Section
