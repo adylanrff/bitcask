@@ -1,9 +1,10 @@
 package main
 
-import "github.com/adylanrff/bitcask"
+import (
+	"github.com/adylanrff/bitcask"
+)
 
 func main() {
-	println("Hello world")
 	db, err := bitcask.Open("test.db")
 	if err != nil {
 		panic(err)

@@ -64,7 +64,7 @@ func (*binaryCodec) Decode(r io.Reader) (*data.Entry, uint64, error) {
 		return nil, 0, err
 	}
 
-	var e *data.Entry = &data.Entry{}
+	var e = &data.Entry{}
 	e.Crc = crc
 	e.Key = types.Key(keyValueBuf[:keySize])
 	e.Value = keyValueBuf[keySize : valueSize+uint64(keySize)]
